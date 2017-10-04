@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Comic Tracker Android</string>
+    <string name="the_comic_title">The comic title</string>
+    <string name="the_comic_publisher">The comic publisher</string>
+</resources>
