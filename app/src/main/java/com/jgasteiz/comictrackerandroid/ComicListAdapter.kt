@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.TextView
 import com.jgasteiz.comictrackerandroid.models.Comic
-import java.util.*
 
 class ComicListAdapter internal constructor(context: Context, comicList: List<Comic>?) : ArrayAdapter<Comic>(context, 0, comicList) {
 

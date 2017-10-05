@@ -7,98 +7,161 @@ import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
+import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 
 class ComicTrackerApiClient {
     private val LOG_TAG = ComicTrackerApiClient::class.java.simpleName
 
-    val baseUrl = "https://comic-tracker.herokuapp.com"
-    var token = ""
-
-    fun getMockWeeklyReleases (): List<Comic> {
-        return Utils().getSampleWeeklyReleases();
-    }
+    private val baseUrl = "https://comic-tracker.herokuapp.com"
+    private var token = ""
 
     /**
-     * Given a username and a password, call the api to retrieve
-     * the given user token.
+     * Get the weekly releases.
      */
-    fun fetchToken(username: String, password: String) {
-        val url = "$baseUrl/api-token-auth/"
-
-        val task = PostStringResponseAsyncTask(object : OnResponseFetched {
+    fun getWeeklyReleases (onWeeklyReleasesFetched: (List<Comic>) -> Unit) {
+        val task = BoringAsyncTask(object: InBackground {
+            override fun callback(): String {
+                return fetchWeeklyReleases()
+            }
+        }, object : OnResponseFetched {
             override fun callback(response: String) {
-                Log.d(LOG_TAG, response)
-                try {
-                    val jsonResponse = JSONObject(response)
-                    token = jsonResponse.get("token") as String
-                    Log.d(LOG_TAG, "Token retrieved: $token")
-                } catch (e: JSONException) {
-                    Log.e(LOG_TAG, e.message)
-                }
+                // Parse the response and pass it to the callback
+                onWeeklyReleasesFetched(parseComicsResponse(response))
             }
         })
-        task.execute(url, "{\"username\":\"$username\",\"password\":\"$password\"}")
+        task.execute()
     }
 
     /**
-     * Given a username and a password, calls the api to retrieve
-     * the given user token.
+     * Get the tracked comics for this week.
      */
-    fun getWeeklyReleases() {
-        val url = "$baseUrl/api/new-releases/"
-    }
-
-    class GetStringResponseAsyncTask(private val mOnResponseFetched: OnResponseFetched) : AsyncTask<String, Void, String>() {
-
-        private val client = OkHttpClient()
-
-        override fun doInBackground(vararg params: String): String? {
-            val url = params[0]
-
-            val request = Request.Builder()
-                    .url(url)
-                    .build()
-            try {
-                val response = client.newCall(request).execute()
-                return response.body()!!.string()
-            } catch (e: Exception) {
-                e.printStackTrace()
+    fun getTrackedComics (onTrackedComicsFetched: (List<Comic>) -> Unit) {
+        val task = BoringAsyncTask(object: InBackground {
+            override fun callback(): String {
+                return fetchTrackedComics()
             }
-            return null
-        }
-
-        override fun onPostExecute(response: String) {
-            mOnResponseFetched.callback(response)
-        }
+        }, object : OnResponseFetched {
+            override fun callback(response: String) {
+                // Parse the response and pass it to the callback
+                onTrackedComicsFetched(parseComicsResponse(response))
+            }
+        })
+        task.execute()
     }
 
-    class PostStringResponseAsyncTask(private val mOnResponseFetched: OnResponseFetched) : AsyncTask<String, Void, String>() {
+    /**
+     * Fetch the token if needed.
+     */
+    private fun fetchToken() {
+        val client = OkHttpClient()
 
-        private val client = OkHttpClient()
+        val url = "$baseUrl/api-token-auth/"
+        val payload = "{\"username\":\"${Secret.USERNAME}\",\"password\":\"${Secret.PASSWORD}\"}"
         val JSON = MediaType.parse("application/json; charset=utf-8")
 
-        override fun doInBackground(vararg params: String): String? {
-            val url = params[0]
-            val payload = params[1]
+        val body = RequestBody.create(JSON, payload)
+        val request = Request.Builder()
+                .url(url)
+                .post(body)
+                .build()
+        try {
+            val response = client.newCall(request).execute()
+            val jsonResponse = JSONObject(response.body()!!.string())
+            token = jsonResponse.get("token") as String
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return
+    }
 
-            val body = RequestBody.create(JSON, payload)
-            val request = Request.Builder()
-                    .url(url)
-                    .post(body)
-                    .build()
-            try {
-                val response = client.newCall(request).execute()
-                return response.body()!!.string()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-            return null
+    /**
+     * Fetch the weekly releases from the api.
+     */
+    private fun fetchWeeklyReleases() : String {
+        if (token == "") {
+            fetchToken()
         }
 
+        val url = "$baseUrl/api/new-releases/"
+        val client = OkHttpClient()
+        val request = Request.Builder()
+                .url(url)
+                .header("Authorization", "Token $token")
+                .build()
+        try {
+            val response = client.newCall(request).execute()
+            return response.body()!!.string()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return "[]"
+    }
+
+    /**
+     * Fetch the weekly releases from the api.
+     */
+    private fun fetchTrackedComics() : String {
+        if (token == "") {
+            fetchToken()
+        }
+
+        val url = "$baseUrl/api/tracked-comics/"
+        val client = OkHttpClient()
+        val request = Request.Builder()
+                .url(url)
+                .header("Authorization", "Token $token")
+                .build()
+        try {
+            val response = client.newCall(request).execute()
+            return response.body()!!.string()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return "[]"
+    }
+
+    /**
+     * Given a json response, parse the weekly releases and return
+     * a list of Comic instances.
+     */
+    private fun parseComicsResponse (response: String) : ArrayList<Comic> {
+        val comicList = ArrayList<Comic>()
+        try {
+            val jsonResponse = JSONArray(response)
+            for (i in 0..(jsonResponse.length() - 1)) {
+                val jsonComic = jsonResponse.getJSONObject(i)
+                val comic = Comic(
+                        jsonComic.getInt("external_id"),
+                        jsonComic.getString("title"),
+                        jsonComic.getString("publisher"),
+                        jsonComic.getString("release_date"),
+                        jsonComic.getString("price"),
+                        jsonComic.getString("description"),
+                        jsonComic.getString("cover_url"),
+                        jsonComic.getInt("weekly_index"),
+                        jsonComic.getString("external_url"),
+                        jsonComic.getBoolean("is_tracked")
+                )
+                comicList.add(comic)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return comicList
+    }
+
+    private class BoringAsyncTask(
+            private val mInBackground: InBackground,
+            private val mOnResponseFetched: OnResponseFetched
+    ) : AsyncTask<String, Void, String>()
+    {
+        override fun doInBackground(vararg p0: String?): String {
+            return mInBackground.callback()
+        }
         override fun onPostExecute(response: String) {
-            mOnResponseFetched.callback(response)
+             mOnResponseFetched.callback(response)
         }
     }
 }
