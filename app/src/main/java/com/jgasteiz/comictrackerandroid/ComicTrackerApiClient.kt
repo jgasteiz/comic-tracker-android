@@ -1,14 +1,14 @@
 package com.jgasteiz.comictrackerandroid
 
 import android.os.AsyncTask
-import android.util.Log
+import com.jgasteiz.comictrackerandroid.interfaces.FetchResponseInBackground
+import com.jgasteiz.comictrackerandroid.interfaces.OnResponseFetched
 import com.jgasteiz.comictrackerandroid.models.Comic
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
 import org.json.JSONArray
-import org.json.JSONException
 import org.json.JSONObject
 
 class ComicTrackerApiClient {
@@ -21,12 +21,12 @@ class ComicTrackerApiClient {
      * Get the weekly releases.
      */
     fun getWeeklyReleases (onWeeklyReleasesFetched: (List<Comic>) -> Unit) {
-        val task = BoringAsyncTask(object: InBackground {
-            override fun callback(): String {
+        val task = ApiAsyncTask(object: FetchResponseInBackground {
+            override fun onResponseFetched(): String {
                 return fetchWeeklyReleases()
             }
         }, object : OnResponseFetched {
-            override fun callback(response: String) {
+            override fun parseResponse(response: String) {
                 // Parse the response and pass it to the callback
                 onWeeklyReleasesFetched(parseComicsResponse(response))
             }
@@ -38,12 +38,12 @@ class ComicTrackerApiClient {
      * Get the tracked comics for this week.
      */
     fun getTrackedComics (onTrackedComicsFetched: (List<Comic>) -> Unit) {
-        val task = BoringAsyncTask(object: InBackground {
-            override fun callback(): String {
+        val task = ApiAsyncTask(object: FetchResponseInBackground {
+            override fun onResponseFetched(): String {
                 return fetchTrackedComics()
             }
         }, object : OnResponseFetched {
-            override fun callback(response: String) {
+            override fun parseResponse(response: String) {
                 // Parse the response and pass it to the callback
                 onTrackedComicsFetched(parseComicsResponse(response))
             }
@@ -152,16 +152,16 @@ class ComicTrackerApiClient {
         return comicList
     }
 
-    private class BoringAsyncTask(
-            private val mInBackground: InBackground,
+    private class ApiAsyncTask(
+            private val mInBackground: FetchResponseInBackground,
             private val mOnResponseFetched: OnResponseFetched
     ) : AsyncTask<String, Void, String>()
     {
         override fun doInBackground(vararg p0: String?): String {
-            return mInBackground.callback()
+            return mInBackground.onResponseFetched()
         }
         override fun onPostExecute(response: String) {
-             mOnResponseFetched.callback(response)
+             mOnResponseFetched.parseResponse(response)
         }
     }
 }
