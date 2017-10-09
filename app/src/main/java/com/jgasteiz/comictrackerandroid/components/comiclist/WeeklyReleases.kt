@@ -27,27 +27,33 @@ class WeeklyReleases : Activity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_weekly_releases)
 
-        mProgressBar = findViewById<ProgressBar>(R.id.progressBar)
-        mComicListView = findViewById<ListView>(R.id.comicList)
+        // Initialize UI components.
+        mProgressBar = findViewById(R.id.progressBar)
+        mComicListView = findViewById(R.id.comicList)
 
-        fetchComics()
+        // Populate UI.
+        actionBar.title = "Weekly comic releases"
 
+        // Initialise comic list callback action.
         mComicListView.onItemClickListener = AdapterView.OnItemClickListener { _, _, position, _ ->
             val intent = Intent(this, ComicDetail::class.java)
             intent.putExtra("comic", mComicList[position])
             startActivity(intent)
         }
+
+        // Fetch the weekly comics.
+        fetchComics()
     }
 
     private fun fetchComics() {
         mProgressBar.animate()
-        mProgressBar.visibility = ProgressBar.VISIBLE
+        mProgressBar.visibility = View.VISIBLE
 
         val apiClient = ComicTrackerApiClient()
         apiClient.getWeeklyReleases { comicList ->
             mComicList = comicList
             mProgressBar.clearAnimation()
-            mProgressBar.visibility = ProgressBar.GONE
+            mProgressBar.visibility = View.GONE
 
             if (mComicList.count() > 0) {
                 Log.d(LOG_TAG, "Comics fetched: $mComicList")
