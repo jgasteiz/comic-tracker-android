@@ -34,4 +34,8 @@ dependencies {
 
     // OkHttp
     compile 'com.squareup.okhttp3:okhttp:3.9.0'
+    // Easy loading images.
+    compile 'com.squareup.picasso:picasso:2.5.2'
+    // Easy handling imageviews.
+    compile 'com.commit451:PhotoView:1.2.4'
 }
