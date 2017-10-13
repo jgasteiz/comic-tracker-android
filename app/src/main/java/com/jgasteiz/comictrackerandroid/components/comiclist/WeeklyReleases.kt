@@ -1,9 +1,15 @@
 package com.jgasteiz.comictrackerandroid.components.comiclist
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.support.design.widget.Snackbar
+import android.support.design.widget.NavigationView
+import android.support.v4.view.GravityCompat
+import android.support.v7.app.ActionBarDrawerToggle
+import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ListView
@@ -13,9 +19,11 @@ import com.jgasteiz.comictrackerandroid.ComicTrackerApiClient
 import com.jgasteiz.comictrackerandroid.R
 import com.jgasteiz.comictrackerandroid.components.comicdetail.ComicDetail
 import com.jgasteiz.comictrackerandroid.models.Comic
+import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.app_bar_main.*
 
-class WeeklyReleases : Activity() {
 
+class WeeklyReleases : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     private val LOG_TAG = WeeklyReleases::class.java.simpleName
 
     private lateinit var mProgressBar: ProgressBar
@@ -25,14 +33,12 @@ class WeeklyReleases : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_weekly_releases)
+        setContentView(R.layout.activity_main)
+        setSupportActionBar(toolbar)
 
         // Initialize UI components.
         mProgressBar = findViewById(R.id.progressBar)
         mComicListView = findViewById(R.id.comicList)
-
-        // Populate UI.
-        actionBar.title = "Weekly comic releases"
 
         // Initialise comic list callback action.
         mComicListView.onItemClickListener = AdapterView.OnItemClickListener { _, _, position, _ ->
@@ -43,6 +49,18 @@ class WeeklyReleases : Activity() {
 
         // Fetch the weekly comics.
         fetchComics()
+
+        // Initialise navigation
+        val toggle = ActionBarDrawerToggle(
+                this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
+        drawer_layout.addDrawerListener(toggle)
+        toggle.syncState()
+
+        nav_view.setNavigationItemSelectedListener(this)
+    }
+
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     private fun fetchComics() {
