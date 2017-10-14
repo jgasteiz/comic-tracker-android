@@ -14,7 +14,7 @@ import android.widget.ProgressBar
 import android.widget.Toast
 import com.jgasteiz.comictrackerandroid.ComicTrackerApiClient
 import com.jgasteiz.comictrackerandroid.R
-import com.jgasteiz.comictrackerandroid.components.comicdetail.ComicDetail
+import com.jgasteiz.comictrackerandroid.components.comicdetail.ComicDetailActivity
 import com.jgasteiz.comictrackerandroid.models.Comic
 
 class WeeklyReleasesFragment : Fragment() {
@@ -37,7 +37,7 @@ class WeeklyReleasesFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view: View = inflater!!.inflate(R.layout.comic_list, container,false)
+        val view: View = inflater!!.inflate(R.layout.fragment_comic_list, container,false)
 
         // Initialize UI components.
         mProgressBar = view.findViewById(R.id.progressBar)
@@ -45,7 +45,7 @@ class WeeklyReleasesFragment : Fragment() {
 
         // Initialise comic list callback action.
         mComicListView.onItemClickListener = AdapterView.OnItemClickListener { _, _, position, _ ->
-            val intent = Intent(activity, ComicDetail::class.java)
+            val intent = Intent(activity, ComicDetailActivity::class.java)
             intent.putExtra("comic", mComicList[position])
             startActivity(intent)
         }

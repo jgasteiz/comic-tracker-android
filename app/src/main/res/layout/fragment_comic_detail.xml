@@ -7,7 +7,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:padding="10dp"
-        tools:context="com.jgasteiz.comictrackerandroid.components.comicdetail.ComicDetail">
+        tools:context="com.jgasteiz.comictrackerandroid.components.comicdetail.ComicDetailActivity">
 
     <TextView
             android:id="@+id/comicTitle"

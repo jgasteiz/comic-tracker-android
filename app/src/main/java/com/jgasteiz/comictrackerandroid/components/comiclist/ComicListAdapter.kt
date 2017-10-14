@@ -23,7 +23,7 @@ class ComicListAdapter internal constructor(context: Context, comicList: List<Co
 
         // Inflate the view if necessary.
         if (cView == null) {
-            cView = LayoutInflater.from(context).inflate(R.layout.comic_item, parent, false)!!
+            cView = LayoutInflater.from(context).inflate(R.layout.adapter_comic_item, parent, false)!!
         }
 
         // Get references to the text views.

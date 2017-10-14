@@ -33,7 +33,7 @@
         </activity>
 
         <activity
-                android:name=".components.comicdetail.ComicDetail"
+                android:name=".components.comicdetail.ComicDetailActivity"
                 android:parentActivityName=".components.comiclist.WeeklyReleasesActivity"
                 android:configChanges="orientation|screenSize"
         >
