@@ -14,7 +14,7 @@ class ComicListAdapter internal constructor(context: Context, comicList: List<Co
     private val LOG_TAG = ComicListAdapter::class.java.simpleName
 
     // We need a reference to the parent activity.
-    private val mWeeklyReleases: WeeklyReleases = context as WeeklyReleases
+    private val mWeeklyReleases: WeeklyReleasesActivity = context as WeeklyReleasesActivity
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         var cView = convertView
