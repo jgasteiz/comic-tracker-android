@@ -11,11 +11,6 @@ import com.jgasteiz.comictrackerandroid.models.Comic
 
 class ComicListAdapter internal constructor(context: Context, comicList: List<Comic>?) : ArrayAdapter<Comic>(context, 0, comicList) {
 
-    private val LOG_TAG = ComicListAdapter::class.java.simpleName
-
-    // We need a reference to the parent activity.
-    private val mWeeklyReleases: WeeklyReleasesActivity = context as WeeklyReleasesActivity
-
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         var cView = convertView
         // Get the data item for this position

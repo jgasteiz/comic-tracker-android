@@ -33,11 +33,16 @@
         </activity>
 
         <activity
+                android:name=".components.comiclist.TrackedComicsActivity"
+                android:configChanges="orientation|screenSize"
+                android:theme="@style/AppTheme.NoActionBar"
+        />
+
+        <activity
                 android:name=".components.comicdetail.ComicDetailActivity"
                 android:parentActivityName=".components.comiclist.WeeklyReleasesActivity"
                 android:configChanges="orientation|screenSize"
-        >
-        </activity>
+        />
     </application>
 
 </manifest>
